@@ -3,7 +3,7 @@ from typing import List
 import requests
 from bs4 import BeautifulSoup
 
-"""Collect all the credit card urls from SBI."""
+"""Collects all the credit card urls from SBI."""
 
 _category_lifestyle = "https://www.sbicard.com/en/personal/credit-cards.page#lifestyle"
 _category_rewards = "https://www.sbicard.com/en/personal/credit-cards.page#reward"
