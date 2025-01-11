@@ -1,0 +1,219 @@
+### Instructions for Large Language Model (LLM) to Extract Credit Card Data
+
+1. **Input**:  
+   The input will be a scraped document about a credit card. It may contain structured or unstructured text with details about the card, its features, fees, and rewards.
+
+2. **Output**:  
+   The model should return a JSON object with the fields listed below. **If any specific detail is not found in the document, mark that field as `"null"`**.
+
+### JSON Format
+
+```json
+{{
+  "card_name": "String or null",
+  "card_category": "String or null",
+  "card_issuer": "String or null",
+  "card_network": "String or null",
+  "eligibility": ["String"] or null,
+  "documents_required": ["String"] or null,
+  "card_best_for": "String or null",
+  "card_co-branded_name": "String or null",
+
+  "joining_fees": "String or null",
+  "annual_fees": "String or null",
+  "card_replacement_fees": "String or null",
+  "annual_fees_waived_off": "String or null",
+  "minimum_repayment_amount": "String or null",
+  "cash_withdrawal_fee": "String or null",
+  "foreign_transaction_fee": "String or null",
+  "fuel_transaction_surcharge": "String or null",
+  "over_limit_penalty": "String or null",
+  "late_payment_charges": ["String"] or null,
+  "welcome_benefits": ["String"] or null,
+
+  "online_shopping": {{
+    "amazon": "String or null",
+    "flipkart": "String or null",
+    "myntra": "String or null",
+    "messho": "String or null",
+    "ola": "String or null",
+    "uber": "String or null",
+    "rapido": "String or null",
+    "other_online_spends": "String or null"
+  }},
+
+  "grocery_websites": {{
+    "blinkit": "String or null",
+    "flipkart_grocery_minutes": "String or null",
+    "zepto": "String or null",
+    "big_basket": "String or null",
+    "dmart": "String or null",
+    "reliance_fresh": "String or null",
+    "tata_start_bazzar": "String or null",
+    "vishal_mega_mart": "String or null",
+    "offline_grocery": "String or null"
+  }},
+
+  "food_and_dining": {{
+    "zomato": "String or null",
+    "swiggy": "String or null"
+  }},
+
+  "utility": {{
+    "mobile_recharge": "String or null",
+    "water": "String or null",
+    "gas": "String or null",
+    "electricity": "String or null"
+  }},
+
+  "upi": "String or null",
+  "insurance": "String or null",
+  "govt_payments": "String or null",
+  "rent_payments": "String or null",
+  "offline_spends": "String or null",
+  "fuel": "String or null",
+  "travel": "String or null",
+
+  "fastfood_brands": {{
+    "dominos": "String or null",
+    "kfc": "String or null",
+    "burger_king": "String or null",
+    "wow_momo": "String or null",
+    "mc_donalds": "String or null"
+  }},
+
+  "lounge_access": ["String"] or null,
+  "other_rewards": ["String"] or null
+}}
+```
+
+### Extraction Guidelines
+
+1. **Field Values**:
+   - If the specific detail is **found** in the document, extract the value as a string or an array (depending on the field type).
+   - If the specific detail is **not found**, return `"null"` for that field.
+
+2. **Field Types**:
+   - **String fields**: Return the extracted text directly or `"null"` if missing.
+   - **Array fields**: Return a list of extracted values, or `"null"` if no relevant information is found.
+   - **Object fields**: Return extracted key-value pairs for each sub-field, marking missing values as `"null"`.
+
+3. **Consistency**:
+   - Ensure consistency in field formatting:
+     - Use the same capitalization and style as in the JSON format provided.
+     - Include currency symbols (like INR) if they are present in the document.
+
+4. **Handling Missing Data**:
+   - Fields with missing or unavailable data should be explicitly set to `"null"`.
+   - For array fields, if no relevant information is found, the field should be set to `"null"` rather than an empty array.
+
+5. **Error Handling**:
+   - If conflicting information is present in the document, prioritize extracting the most specific and relevant details.
+   - In case of unclear or ambiguous information, return `"null"` and avoid making assumptions about the missing details.
+
+6. **Output Example**:
+   - Ensure the output matches the JSON format exactly, with consistent key names and values as specified.
+
+### Example Output
+If the document contains only partial information, such as card name, issuer, joining fees, and online shopping benefits, the output JSON should look like:
+
+```json
+{{
+  "card_name": "Super Rewards Credit Card",
+  "card_category": null,
+  "card_issuer": "ABC Bank",
+  "card_network": null,
+  "eligibility": null,
+  "documents_required": null,
+  "card_best_for": null,
+  "card_co-branded_name": null,
+
+  "joining_fees": "INR 500 + taxes",
+  "annual_fees": null,
+  "card_replacement_fees": null,
+  "annual_fees_waived_off": null,
+  "minimum_repayment_amount": null,
+  "cash_withdrawal_fee": null,
+  "foreign_transaction_fee": null,
+  "fuel_transaction_surcharge": null,
+  "over_limit_penalty": null,
+  "late_payment_charges": null,
+  "welcome_benefits": null,
+
+  "online_shopping": {{
+    "amazon": "5% cashback",
+    "flipkart": "5% cashback",
+    "myntra": null,
+    "messho": null,
+    "ola": null,
+    "uber": null,
+    "rapido": null,
+    "other_online_spends": "2% cashback"
+  }},
+
+  "grocery_websites": {{
+    "blinkit": null,
+    "flipkart_grocery_minutes": null,
+    "zepto": null,
+    "big_basket": null,
+    "dmart": null,
+    "reliance_fresh": null,
+    "tata_start_bazzar": null,
+    "vishal_mega_mart": null,
+    "offline_grocery": null
+  }},
+
+  "food_and_dining": {{
+    "zomato": null,
+    "swiggy": null
+  }},
+
+  "utility": {{
+    "mobile_recharge": null,
+    "water": null,
+    "gas": null,
+    "electricity": null
+  }},
+
+  "upi": null,
+  "insurance": null,
+  "govt_payments": null,
+  "rent_payments": null,
+  "offline_spends": null,
+  "fuel": null,
+  "travel": null,
+
+  "fastfood_brands": {{
+    "dominos": null,
+    "kfc": null,
+    "burger_king": null,
+    "wow_momo": null,
+    "mc_donalds": null
+  }},
+
+  "lounge_access": null,
+  "other_rewards": null
+}}
+```
+
+### Notes for the Model
+
+1. **Null Handling**:  
+   - Ensure that all fields with no extracted data are explicitly marked as `"null"` in the JSON output.
+
+2. **Data Consistency**:  
+   - Maintain consistency in the format of extracted data. For example:  
+     - Use a consistent style for fees, including currency symbols like INR if they are present in the document.  
+     - Ensure arrays contain valid strings, or use `"null"` if no data is available.
+
+3. **Error Handling**:  
+   - If the document is incomplete or contains conflicting information, prioritize extracting clear and unambiguous details.  
+   - In case of uncertainty or ambiguity, mark the respective fields as `"null"`.
+
+4. **Object and Array Fields**:  
+   - For object fields, return key-value pairs with missing values set to `"null"`.  
+   - For array fields, return a list of values if available, or `"null"` if no data is found.
+
+### Document
+
+{document}
