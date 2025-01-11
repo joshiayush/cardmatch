@@ -17,7 +17,6 @@ _category_banking_partnership = (
 _category_business = "https://www.sbicard.com/en/personal/credit-cards.page#business"
 
 
-_sbi_card_base_url = "https://www.sbicard.com"
 _learn_more_link_cls = "learn-more-link"
 
 
@@ -29,15 +28,16 @@ class Sbi:
 
     def load_urls(self) -> List[str]:
         """Finds url of each credit card listed over the webpage."""
-        urls = list()
+        urls = set()
         for category in self._categories:
             re = requests.get(category)
 
             soup = BeautifulSoup(re.content, "html.parser")
             links = soup.find_all("a", class_=_learn_more_link_cls)
             for link in links:
-                urls.append(_sbi_card_base_url + link.get("href"))
-        return urls
+                if not link.get("href") in urls:
+                    urls.add(link.get("href"))
+        return list(urls)
 
 
 def load_sbi_credit_card_urls() -> List[str]:
