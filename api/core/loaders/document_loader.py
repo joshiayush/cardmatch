@@ -72,5 +72,7 @@ def load_docs_from_urls(urls: List[str]) -> List[Dict]:
 
         for doc in docs:
             re = chain.invoke({"document": doc.page_content})
-            json_docs.append(llm_response_to_json(re)["data"])
+            json_doc = llm_response_to_json(re)["data"]
+            json_doc["source"] = doc.metadata["source"]
+            json_docs.append(json_doc)
     return json_docs
