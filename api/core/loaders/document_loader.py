@@ -10,6 +10,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
+from api.utils import get_credit_card_unique_name
+
 load_dotenv()
 
 BASE_PROMPTS_DIR = pathlib.Path(os.getenv("BASE_PROMPTS_DIR"))
@@ -74,5 +76,8 @@ def load_docs_from_urls(urls: List[str]) -> List[Dict]:
             re = chain.invoke({"document": doc.page_content})
             json_doc = llm_response_to_json(re)["data"]
             json_doc["source"] = doc.metadata["source"]
+            json_doc["unique_name"] = get_credit_card_unique_name(
+                doc.metadata["source"]
+            )
             json_docs.append(json_doc)
     return json_docs
