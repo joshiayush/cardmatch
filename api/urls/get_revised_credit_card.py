@@ -14,5 +14,7 @@ def get_revised_credit_card(req: RevisedCreditCardRequest) -> Dict:
         return {}
 
     docs = load_docs_from_urls([doc["source"]])
+    _id = docs[0].pop("_id", None)
     credit_cards_collection.update_one({"_id": ObjectId(doc["_id"])}, {"$set": docs[0]})
+    docs[0]["_id"] = str(_id)
     return docs[0]
