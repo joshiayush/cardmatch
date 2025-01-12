@@ -14,6 +14,6 @@ async def list_all_cards_endpoint():
     return list_all_cards()
 
 
-@app.post("/api/get-revised-credit-card", response_model=Dict[str, Dict])
+@app.post("/api/get-revised-credit-card", response_model=Dict)
 async def get_revised_credit_card_endpoint(req: RevisedCreditCardRequest):
     return get_revised_credit_card(req)
