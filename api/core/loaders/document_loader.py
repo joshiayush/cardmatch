@@ -60,7 +60,7 @@ def llm_response_to_json(message: str) -> Dict:
     return data
 
 
-def load_docs_from_urls(urls: List[str]) -> List[Dict]:
+def load_docs_from_urls(urls: List[str], /, *, revised: bool = False) -> List[Dict]:
     """Loads a credit card JSON doc from each url."""
     loader = WebBaseLoader(urls)
     docs = loader.load()
@@ -81,7 +81,8 @@ def load_docs_from_urls(urls: List[str]) -> List[Dict]:
             json_doc["unique_name"] = get_credit_card_unique_name(
                 doc.metadata["source"]
             )
-            credit_cards_collection.insert_one(json_doc)
+            if revised is False:
+                credit_cards_collection.insert_one(json_doc)
 
             json_docs.append(json_doc)
     return json_docs
