@@ -4,86 +4,332 @@
    The input will be a scraped document about a credit card. It may contain structured or unstructured text with details about the card, its features, fees, and rewards.
 
 2. **Output**:  
-   The model should return a JSON object with the fields listed below. **If any specific detail is not found in the document, mark that field as `"null"`**.
+   The model should return a JSON object with the schema listed below. **If any specific detail is not found in the document, mark that field as `"null"`**.
 
 ### JSON Format
 
 ```json
 {{
-  "card_name": "String or null",
-  "card_category": "String or null",
-  "card_issuer": "String or null",
-  "card_network": "String or null",
-  "eligibility": ["String"] or null,
-  "documents_required": ["String"] or null,
-  "card_best_for": "String or null",
-  "card_co-branded_name": "String or null",
-
-  "joining_fees": "String or null",
-  "annual_fees": "String or null",
-  "card_replacement_fees": "String or null",
-  "annual_fees_waived_off": "String or null",
-  "minimum_repayment_amount": "String or null",
-  "cash_withdrawal_fee": "String or null",
-  "foreign_transaction_fee": "String or null",
-  "fuel_transaction_surcharge": "String or null",
-  "over_limit_penalty": "String or null",
-  "late_payment_charges": ["String"] or null,
-  "welcome_benefits": ["String"] or null,
-
-  "online_shopping": {{
-    "amazon": "String or null",
-    "flipkart": "String or null",
-    "myntra": "String or null",
-    "messho": "String or null",
-    "ola": "String or null",
-    "uber": "String or null",
-    "rapido": "String or null",
-    "other_online_spends": "String or null"
+  "card_name": {{
+    "type": "String",
+    "description": "The name of card",
+    "required": true
   }},
-
-  "grocery_websites": {{
-    "blinkit": "String or null",
-    "flipkart_grocery_minutes": "String or null",
-    "zepto": "String or null",
-    "big_basket": "String or null",
-    "dmart": "String or null",
-    "reliance_fresh": "String or null",
-    "tata_start_bazzar": "String or null",
-    "vishal_mega_mart": "String or null",
-    "offline_grocery": "String or null"
+  "card_category": {{
+    "type": "Enum",
+    "description": "The category of the card",
+    "required": false,
+    "enum": [
+      "Regular",
+      "Premium",
+      "Co-branded",
+      "Business",
+      "CashBack",
+      "Secured",
+      "Lifestyle",
+      "Travel",
+      "Shopping",
+      "Fuel"
+    ]
   }},
-
-  "food_and_dining": {{
-    "zomato": "String or null",
-    "swiggy": "String or null"
+  "card_issuer": {{
+    "type": "String",
+    "description": "The name of the card issuers (Bank)",
+    "required": true
   }},
-
-  "utility": {{
-    "mobile_recharge": "String or null",
-    "water": "String or null",
-    "gas": "String or null",
-    "electricity": "String or null"
+  "card_network": {{
+    "type": "Enum",
+    "description": "The network of card",
+    "required": true,
+     "enum": [
+     "Visa",
+     "Mastercard",
+     "American Express",
+     "Discover",
+     "JCB",
+     "Diners Club",
+     "UnionPay",
+     "RuPay",
+     "Maestro",
+     "Mir",
+     "Interac"
+    ]
   }},
-
-  "upi": "String or null",
-  "insurance": "String or null",
-  "govt_payments": "String or null",
-  "rent_payments": "String or null",
-  "offline_spends": "String or null",
-  "fuel": "String or null",
-  "travel": "String or null",
-
-  "fastfood_brands": {{
-    "dominos": "String or null",
-    "kfc": "String or null",
-    "burger_king": "String or null",
-    "wow_momo": "String or null",
-    "mc_donalds": "String or null"
+  "card_co_brand_name": {{
+    "type": "String",
+    "description": "The brand name of card",
+    "required": false
   }},
-
-  "lounge_access": ["String"] or null,
-  "other_rewards": ["String"] or null
+  "joining_fees": {{
+    "type": "Number",
+    "description": "Joining fees of the credit card (excluding gst)",
+    "required": true
+  }},
+  "annual_fees": {{
+    "type": "Number",
+    "description": "Annual fees of the credit card (excluding gst)",
+    "required": true
+  }},
+  "annual_fees_waived_off": {{
+    "type": "String",
+    "description": "If options available for annual fees waived off",
+    "required": false
+  }},
+  "card_replacement_fees": {{
+    "type": "Number",
+    "description": "Fee of card replacement (excluding gst)",
+    "required": false
+  }},
+  "minimum_repayment_amount": {{
+    "type": "String",
+    "description": "Minimum due amount for repayment",
+    "required": false
+  }},
+  "cash_withdrawal_fee": {{
+    "type": "String",
+    "description": "Cash withdrawl fees",
+    "required": false
+  }},
+  "cash_advance_fee": {{
+    "type": "String",
+    "description": "Cash Advance fees",
+    "required": false
+  }},
+  "over_limit_fee": {{
+    "type": "String",
+    "description": "Over Limit Penalty Fee",
+    "required": false
+  }},
+  "late_payment_charges": {{
+    "type": "Array",
+    "description": "Late Payment Charges",
+    "required": false
+  }},
+  "return_of_cheque_charges": {{
+    "type": "String",
+    "description": "Charges for Return of cheque",
+    "required": false
+  }},
+  "auto_debit_return_charges": {{
+    "type": "Array",
+    "description": "Auto Debit return fees",
+    "required": false
+  }},
+  "foreign_transaction_fee": {{
+    "type": "String",
+    "description": "Foreign Transaction Fee",
+    "required": false
+  }},
+  "rent_pay_transaction_fee": {{
+    "type": "String",
+    "description": "Fee on Rent Pay Transactions",
+    "required": false
+  }},
+  "education_transaction_fee": {{
+    "type": "String",
+    "description": "Fee on Education Transactions",
+    "required": false
+  }},
+  "utility_transaction_fee": {{
+    "type": "String",
+    "description": "Fee on Utility Transactions",
+    "required": false
+  }},
+  "fuel_transaction_fee": {{
+    "type": "String",
+    "description": "Fee on Fuel Transactions",
+    "required": false
+  }},
+  "fuel_transaction_surcharge": {{
+    "type": "String",
+    "description": "Fuel Transaction Surcharge",
+    "required": false
+  }},
+  "welcome_benefits": {{
+    "type": "Array",
+    "description": "Welcome benefits",
+    "required": false
+  }},
+  "benefits_on_amazon": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on amazon",
+    "required": false
+  }},
+  "benefits_on_flipkart": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on flipkart",
+    "required": false
+  }},
+  "benefits_on_myntra": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on myntra",
+    "required": false
+  }},
+  "benefits_on_messho": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on messho",
+    "required": false
+  }},
+  "benefits_on_ola": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on ola",
+    "required": false
+  }},
+  "benefits_on_uber": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on uber",
+    "required": false
+  }},
+  "benefits_on_rapido": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on rapido",
+    "required": false
+  }},
+  "benefits_on_zomato": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on zomato",
+    "required": false
+  }},
+  "benefits_on_swiggy": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on swiggy",
+    "required": false
+  }},
+  "benefits_on_blinkit": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on blinkit",
+    "required": false
+  }},
+  "benefits_on_flipkart_grocery_minutes": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on flipkart grocery minutes",
+    "required": false
+  }},
+  "benefits_on_zepto": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on zepto",
+    "required": false
+  }},
+  "benefits_on_big_basket": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on big basket",
+    "required": false
+  }},
+  "benefits_on_dmart": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on dmart",
+    "required": false
+  }},
+  "benefits_on_reliance_fresh": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on reliance fresh",
+    "required": false
+  }},
+  "benefits_on_tata_star_bazzar": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on tata star bazzar",
+    "required": false
+  }},
+  "benefits_on_vishal_mega_mart": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on vishal mega mart",
+    "required": false
+  }},
+  "benefits_on_dominos": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on dominos",
+    "required": false
+  }},
+  "benefits_on_kfc": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on kfc",
+    "required": false
+  }},
+  "benefits_on_burger_king": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on burger king",
+    "required": false
+  }},
+  "benefits_on_wow_momo": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on wow momo",
+    "required": false
+  }},
+  "benefits_on_mc_donalds": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on mc donalds",
+    "required": false
+  }},
+  "benefits_on_other_online_spends": {{
+    "type": "Array",
+    "description": "How much cashback/rewards except all online like amazon, flipkart, myntra, messho, ola, uber, rapido, Zomato, Swiggy, Blinkit, Flipkart Grocery Minutes, Zepto, Big Basket, Dmart, Reliance Fresh, Tata Start Bazzar, Vishal Mega Mart",
+    "required": false
+  }},
+  "benefits_on_other_offline_spends": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on offline spends",
+    "required": false
+  }},
+  "benefits_on_mobile_recharge": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on mobile recharge",
+    "required": false
+  }},
+  "benefits_on_water_bill": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on water bill",
+    "required": false
+  }},
+  "benefits_on_gas_bill": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on gas bill",
+    "required": false
+  }},
+  "benefits_on_electricity_bill": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on electricity bill",
+    "required": false
+  }},
+  "benefits_on_upi": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on UPI",
+    "required": false
+  }},
+  "benefits_on_insurance": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on insurance",
+    "required": false
+  }},
+  "benefits_on_govt_payments": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on govt payments",
+    "required": false
+  }},
+  "benefits_on_rent_payments": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on rent payments",
+    "required": false
+  }},
+  "benefits_on_fuel": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on fuel",
+    "required": false
+  }},
+  "benefits_on_travel": {{
+    "type": "Array",
+    "description": "How much cashback/rewards on travel",
+    "required": false
+  }},
+  "benefits_on_lounge_access": {{
+    "type": "Array",
+    "description": "Lounge access",
+    "required": false
+  }},
+  "other_rewards": {{
+    "type": "Array",
+    "description": "Other rewards other than all the category like online, offline, rent, insurance, govt payments, fuel, travel and utility",
+    "required": false
+  }}
 }}
 ```
 
@@ -119,80 +365,86 @@ If the document contains only partial information, such as card name, issuer, jo
 
 ```json
 {{
-  "card_name": "Super Rewards Credit Card",
-  "card_category": null,
-  "card_issuer": "ABC Bank",
-  "card_network": null,
-  "eligibility": null,
-  "documents_required": null,
-  "card_best_for": null,
-  "card_co-branded_name": null,
-
-  "joining_fees": "INR 500 + taxes",
-  "annual_fees": null,
-  "card_replacement_fees": null,
-  "annual_fees_waived_off": null,
-  "minimum_repayment_amount": null,
-  "cash_withdrawal_fee": null,
-  "foreign_transaction_fee": null,
-  "fuel_transaction_surcharge": null,
-  "over_limit_penalty": null,
-  "late_payment_charges": null,
-  "welcome_benefits": null,
-
-  "online_shopping": {{
-    "amazon": "5% cashback",
-    "flipkart": "5% cashback",
-    "myntra": null,
-    "messho": null,
-    "ola": null,
-    "uber": null,
-    "rapido": null,
-    "other_online_spends": "2% cashback"
-  }},
-
-  "grocery_websites": {{
-    "blinkit": null,
-    "flipkart_grocery_minutes": null,
-    "zepto": null,
-    "big_basket": null,
-    "dmart": null,
-    "reliance_fresh": null,
-    "tata_start_bazzar": null,
-    "vishal_mega_mart": null,
-    "offline_grocery": null
-  }},
-
-  "food_and_dining": {{
-    "zomato": null,
-    "swiggy": null
-  }},
-
-  "utility": {{
-    "mobile_recharge": null,
-    "water": null,
-    "gas": null,
-    "electricity": null
-  }},
-
-  "upi": null,
-  "insurance": null,
-  "govt_payments": null,
-  "rent_payments": null,
-  "offline_spends": null,
-  "fuel": null,
-  "travel": null,
-
-  "fastfood_brands": {{
-    "dominos": null,
-    "kfc": null,
-    "burger_king": null,
-    "wow_momo": null,
-    "mc_donalds": null
-  }},
-
-  "lounge_access": null,
-  "other_rewards": null
+  "card_name": "SBI Card ELITE",
+  "card_category": "Lifestyle",
+  "card_issuer": "SBI",
+  "card_network": "Visa",
+  "card_co_brand_name": "null",
+  "joining_fees": 4999,
+  "annual_fees": 4999,
+  "annual_fees_waived_off": "Spend INR 10 Lakh or more in a year to get a fee waiver",
+  "card_replacement_fees": "null",
+  "minimum_repayment_amount": "null",
+  "cash_withdrawal_fee": "2.5% of the withdrawn amount or INR 500, whichever is higher",
+  "cash_advance_fee": "null",
+  "over_limit_fee": "2.5% of over-limit amount or INR 600, whichever is higher",
+  "late_payment_charges": [
+    "Nil for total amount due from INR 0 to INR 500",
+    "INR 400 for total amount due greater than INR 500 & up to INR 1,000",
+    "INR 750 for total amount due greater than INR 1,000 & up to INR 10,000",
+    "INR 950 for total amount due greater than INR 10,000 & up to INR 25,000",
+    "INR 1,100 for total amount due greater than INR 25,000 & up to INR 50,000",
+    "INR 1,300 for total amount due greater than INR 50,000"
+  ],
+  "return_of_cheque_charges": "INR 500",
+  "auto_debit_return_charges": [
+    "INR 500 per returned transaction"
+  ],
+  "foreign_transaction_fee": "3.5% of the transaction amount",
+  "rent_pay_transaction_fee": "null",
+  "education_transaction_fee": "null",
+  "utility_transaction_fee": "null",
+  "fuel_transaction_fee": "null",
+  "fuel_transaction_surcharge": "1% surcharge waiver on fuel transactions across all petrol pumps for transactions between INR 500 to INR 4,000, maximum waiver of INR 250 per statement cycle",
+  "welcome_benefits": [
+    "INR 5,000 worth of e-vouchers from Pantaloons, Hush Puppies/Bata, Aditya Birla Fashion, Shoppers Stop, and Yatra"
+  ],
+  "benefits_on_amazon": "null",
+  "benefits_on_flipkart": "null",
+  "benefits_on_myntra": "null",
+  "benefits_on_messho": "null",
+  "benefits_on_ola": "null",
+  "benefits_on_uber": "null",
+  "benefits_on_rapido": "null",
+  "benefits_on_zomato": "null",
+  "benefits_on_swiggy": "null",
+  "benefits_on_blinkit": "null",
+  "benefits_on_flipkart_grocery_minutes": "null",
+  "benefits_on_zepto": "null",
+  "benefits_on_big_basket": "null",
+  "benefits_on_dmart": "null",
+  "benefits_on_reliance_fresh": "null",
+  "benefits_on_tata_star_bazzar": "null",
+  "benefits_on_vishal_mega_mart": "null",
+  "benefits_on_dominos": "null",
+  "benefits_on_kfc": "null",
+  "benefits_on_burger_king": "null",
+  "benefits_on_wow_momo": "null",
+  "benefits_on_mc_donalds": "null",
+  "benefits_on_other_online_spends": [
+    "5x Reward Points on Departmental Stores, Dining, Movies, Grocery, and International Transactions"
+  ],
+  "benefits_on_other_offline_spends": "null",
+  "benefits_on_mobile_recharge": "null",
+  "benefits_on_water_bill": "null",
+  "benefits_on_gas_bill": "null",
+  "benefits_on_electricity_bill": "null",
+  "benefits_on_upi": "null",
+  "benefits_on_insurance": "null",
+  "benefits_on_govt_payments": "null",
+  "benefits_on_rent_payments": "null",
+  "benefits_on_fuel": [
+    "1% fuel surcharge waiver"
+  ],
+  "benefits_on_travel": [
+    "Complimentary Club Vistara Silver Membership",
+    "6 Complimentary Domestic Lounge Access visits per year"
+  ],
+  "benefits_on_lounge_access": [
+    "Complimentary Priority Pass Membership for the primary cardholder",
+    "2 Complimentary International Lounge Visits per quarter through Priority Pass Program"
+  ],
+  "other_rewards": "null"
 }}
 ```
 
