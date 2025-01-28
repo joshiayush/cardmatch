@@ -76,7 +76,7 @@ def load_docs_from_urls(cc_info: Dict, /, *, revised: bool = False) -> List[Dict
         prompt_template = PromptTemplate.from_template(prompt)
         chain = prompt_template | llm | StrOutputParser()
 
-    for info in cc_info.values():
+    for key, info in cc_info.items():
         if info["card_link"] is np.nan:
             continue
 
@@ -86,6 +86,7 @@ def load_docs_from_urls(cc_info: Dict, /, *, revised: bool = False) -> List[Dict
         re = chain.invoke({"document": scraped_documents[0].page_content})
 
         json_doc = llm_response_to_json(re)["data"]
+        json_doc["card_name"] = key
         json_doc["source"] = scraped_documents[0].metadata["source"]
         json_doc["card_image"] = info["card_image"]
         json_doc["tnc"] = info["tnc"]
