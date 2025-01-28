@@ -4,11 +4,14 @@ import json
 import logging
 from typing import List, Dict
 
+import numpy as np
+import pandas as pd
 from dotenv import load_dotenv
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain_core.prompts import PromptTemplate
+
 
 from api.db import credit_cards_collection
 from api.utils import get_credit_card_unique_name
@@ -19,6 +22,8 @@ BASE_PROMPTS_DIR = pathlib.Path(os.getenv("BASE_PROMPTS_DIR"))
 _credit_cards_details_extractor_prompt = (
     BASE_PROMPTS_DIR / "extraction/credit_cards_details.txt"
 )
+
+JSON_SCHEMAS_DIR = pathlib.Path(os.getenv("JSON_SCHEMAS_DIR"))
 
 
 def llm_response_to_json(message: str) -> Dict:
@@ -60,12 +65,10 @@ def llm_response_to_json(message: str) -> Dict:
     return data
 
 
-def load_docs_from_urls(urls: List[str], /, *, revised: bool = False) -> List[Dict]:
+def load_docs_from_urls(cc_info: Dict, /, *, revised: bool = False) -> List[Dict]:
     """Loads a credit card JSON doc from each url."""
-    loader = WebBaseLoader(urls)
-    docs = loader.load()
-
     json_docs = list()
+
     with open(_credit_cards_details_extractor_prompt, mode="r") as extractor:
         prompt = extractor.read()
 
@@ -73,16 +76,35 @@ def load_docs_from_urls(urls: List[str], /, *, revised: bool = False) -> List[Di
         prompt_template = PromptTemplate.from_template(prompt)
         chain = prompt_template | llm | StrOutputParser()
 
-        for doc in docs:
-            re = chain.invoke({"document": doc.page_content})
-            
-            json_doc = llm_response_to_json(re)["data"]
-            json_doc["source"] = doc.metadata["source"]
-            json_doc["unique_name"] = get_credit_card_unique_name(
-                doc.metadata["source"]
-            )
-            if revised is False:
-                credit_cards_collection.insert_one(json_doc)
+    for info in cc_info.values():
+        if info["card_link"] is np.nan:
+            continue
 
-            json_docs.append(json_doc)
+        scraped_data_loader = WebBaseLoader(info["card_link"])
+        scraped_documents = scraped_data_loader.load()
+
+        re = chain.invoke({"document": scraped_documents[0].page_content})
+
+        json_doc = llm_response_to_json(re)["data"]
+        json_doc["source"] = scraped_documents[0].metadata["source"]
+        json_doc["card_image"] = info["card_image"]
+        json_doc["tnc"] = info["tnc"]
+        json_doc["unique_name"] = get_credit_card_unique_name(
+            scraped_documents[0].metadata["source"]
+        )
+        if revised is False:
+            credit_cards_collection.insert_one(json_doc)
+
+        json_docs.append(json_doc)
     return json_docs
+
+
+_cc_sheets = ["sbi", "axis", "hdfc"]
+
+
+def load_cc_info() -> Dict:
+    cc_info = dict()
+    for sheet in _cc_sheets:
+        df = pd.read_excel(os.getenv("CC_URLS_FILE_PATH"), sheet_name=sheet)
+        cc_info.update(df.set_index("card_name").T.to_dict())
+    return cc_info

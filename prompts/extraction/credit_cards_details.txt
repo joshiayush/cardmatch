@@ -333,33 +333,6 @@
 }}
 ```
 
-### Extraction Guidelines
-
-1. **Field Values**:
-   - If the specific detail is **found** in the document, extract the value as a string or an array (depending on the field type).
-   - If the specific detail is **not found**, return `"null"` for that field.
-
-2. **Field Types**:
-   - **String fields**: Return the extracted text directly or `"null"` if missing.
-   - **Array fields**: Return a list of extracted values, or `"null"` if no relevant information is found.
-   - **Object fields**: Return extracted key-value pairs for each sub-field, marking missing values as `"null"`.
-
-3. **Consistency**:
-   - Ensure consistency in field formatting:
-     - Use the same capitalization and style as in the JSON format provided.
-     - Include currency symbols (like INR) if they are present in the document.
-
-4. **Handling Missing Data**:
-   - Fields with missing or unavailable data should be explicitly set to `"null"`.
-   - For array fields, if no relevant information is found, the field should be set to `"null"` rather than an empty array.
-
-5. **Error Handling**:
-   - If conflicting information is present in the document, prioritize extracting the most specific and relevant details.
-   - In case of unclear or ambiguous information, return `"null"` and avoid making assumptions about the missing details.
-
-6. **Output Example**:
-   - Ensure the output matches the JSON format exactly, with consistent key names and values as specified.
-
 ### Example Output
 If the document contains only partial information, such as card name, issuer, joining fees, and online shopping benefits, the output JSON should look like:
 
@@ -447,25 +420,3 @@ If the document contains only partial information, such as card name, issuer, jo
   "other_rewards": "null"
 }}
 ```
-
-### Notes for the Model
-
-1. **Null Handling**:  
-   - Ensure that all fields with no extracted data are explicitly marked as `"null"` in the JSON output.
-
-2. **Data Consistency**:  
-   - Maintain consistency in the format of extracted data. For example:  
-     - Use a consistent style for fees, including currency symbols like INR if they are present in the document.  
-     - Ensure arrays contain valid strings, or use `"null"` if no data is available.
-
-3. **Error Handling**:  
-   - If the document is incomplete or contains conflicting information, prioritize extracting clear and unambiguous details.  
-   - In case of uncertainty or ambiguity, mark the respective fields as `"null"`.
-
-4. **Object and Array Fields**:  
-   - For object fields, return key-value pairs with missing values set to `"null"`.  
-   - For array fields, return a list of values if available, or `"null"` if no data is found.
-
-### Document
-
-{document}
