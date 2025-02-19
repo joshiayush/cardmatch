@@ -1,15 +1,14 @@
-import os
-import pathlib
 import json
 import logging
-from typing import List, Dict
+import os
+import pathlib
+from typing import Dict, List
 
 import numpy as np
-import pandas as pd
 from dotenv import load_dotenv
+from langchain.llms.openai import OpenAI
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.output_parsers import StrOutputParser
-from langchain.llms.openai import OpenAI
 from langchain_core.prompts import PromptTemplate
 
 from api.db import credit_cards_collection
