@@ -63,18 +63,35 @@ def load_document(filepath: str) -> list[Document]:
 
 
 def configure_retriever(
-    docs: list[Document], use_compression: Optional[bool] = False
+    docs: list[Document], use_compression: Optional[bool] = False, **kwargs: Dict
 ) -> BaseRetriever:
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800, chunk_overlap=200, separators=["\n\n## ", "\n\n", "\n", ". "]
-    )
-    splits = text_splitter.split_documents(docs)
+    """Configure retriever with the given documents."""
+    embedding_dir_ids = kwargs.get("embedding_dir_ids", None)
 
-    for i, split in enumerate(splits):
-        split.metadata["section_id"] = i // 10
+    # If embeddings directory is present under 'EMBEDDINGS_DIR' path, the load the
+    # embeddings, otherwise create and store them.
+    for dir_id in embedding_dir_ids:
+        if os.path.exists(os.path.join(os.getenv("EMBEDDINGS_DIR"), dir_id)):
+            vectordb = Chroma(
+                persist_directory=os.path.join(os.getenv("EMBEDDINGS_DIR"), dir_id),
+                embedding_function=OpenAIEmbeddings(),
+            )
+        else:
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=800,
+                chunk_overlap=200,
+                separators=["\n\n## ", "\n\n", "\n", ". "],
+            )
+            splits = text_splitter.split_documents(docs)
 
-    embeddings = OpenAIEmbeddings()
-    vectordb = Chroma.from_documents(splits, embeddings)
+            for i, split in enumerate(splits):
+                split.metadata["section_id"] = i // 10
+
+            vectordb = Chroma.from_documents(
+                splits,
+                OpenAIEmbeddings(),
+                persist_directory=os.path.join(os.getenv("EMBEDDINGS_DIR"), dir_id),
+            )
 
     base_retriever = vectordb.as_retriever(
         search_type="mmr", search_kwargs={"k": 6, "fetch_k": 20, "alpha": 0.6}
@@ -84,7 +101,7 @@ def configure_retriever(
     )
     if use_compression:
         embeddings_filter = EmbeddingsFilter(
-            embeddings=embeddings, similarity_threshold=0.76
+            embeddings=OpenAIEmbeddings(), similarity_threshold=0.76
         )
         return ContextualCompressionRetriever(
             base_compressor=embeddings_filter, base_retriever=retriever
@@ -137,7 +154,8 @@ def configure_chain(retriever: BaseRetriever, *, session_id: str) -> Chain:
 def configure_qa_chain(cc_info: Dict, *, session_id: str) -> Chain:
     """Read documents, configure retriever, and the chain."""
     docs = []
-    for _, info in cc_info.items():
+    keys = cc_info.keys()
+    for key, info in cc_info.items():
 
         if info["card_link"] is np.nan and info["tnc"] is np.nan:
             raise ValueError('Either "card_link" or "tnc" needed.')
@@ -150,5 +168,5 @@ def configure_qa_chain(cc_info: Dict, *, session_id: str) -> Chain:
             tnc_doc = load_document(info["tnc"])
             docs.extend(tnc_doc)
 
-    retriever = configure_retriever(docs, use_compression=True)
+    retriever = configure_retriever(docs, use_compression=True, embedding_dir_ids=keys)
     return configure_chain(retriever, session_id=session_id)
