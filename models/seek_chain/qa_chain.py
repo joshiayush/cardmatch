@@ -67,15 +67,17 @@ def configure_retriever(
 ) -> BaseRetriever:
     """Configure retriever with the given documents."""
     embedding_dir_ids = kwargs.get("embedding_dir_ids", None)
+    vector_stores = []
 
     # If embeddings directory is present under 'EMBEDDINGS_DIR' path, the load the
     # embeddings, otherwise create and store them.
     for dir_id in embedding_dir_ids:
         if os.path.exists(os.path.join(os.getenv("EMBEDDINGS_DIR"), dir_id)):
-            vectordb = Chroma(
+            vector_store = Chroma(
                 persist_directory=os.path.join(os.getenv("EMBEDDINGS_DIR"), dir_id),
                 embedding_function=OpenAIEmbeddings(),
             )
+            vector_stores.append(vector_store)
         else:
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=800,
@@ -87,11 +89,29 @@ def configure_retriever(
             for i, split in enumerate(splits):
                 split.metadata["section_id"] = i // 10
 
-            vectordb = Chroma.from_documents(
+            vector_store = Chroma.from_documents(
                 splits,
                 OpenAIEmbeddings(),
                 persist_directory=os.path.join(os.getenv("EMBEDDINGS_DIR"), dir_id),
             )
+            vector_stores.append(vector_store)
+
+    # Merge all vector stores into a single database
+    if vector_stores:
+        all_documents = []
+
+        for store in vector_stores:
+            data = store.get()
+            docs = [
+                Document(page_content=text, metadata=metadata)
+                for text, metadata in zip(data["documents"], data["metadatas"])
+            ]
+            all_documents.extend(docs)
+
+        vectordb = Chroma.from_documents(
+            all_documents,
+            OpenAIEmbeddings(),
+        )
 
     base_retriever = vectordb.as_retriever(
         search_type="mmr", search_kwargs={"k": 6, "fetch_k": 20, "alpha": 0.6}
